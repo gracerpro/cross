@@ -103,7 +103,7 @@ package
 			_usedSquareCount++;
 
 			var status:CheckGameStatus = checkGameOver(x, y)
-			trace(status);
+			trace(status.status);
 			if (status.status != END_NULL)
 				return status.status;
 			
@@ -112,6 +112,7 @@ package
 			if (_computer.isActive())
 			{
 				_computer.click(_whoPlay);
+				_usedSquareCount++;
 				status = checkGameOver(x, y);
 				if (status.status != END_NULL)
 					return status.status;
@@ -162,7 +163,6 @@ package
 				status.point0.y = y;
 				status.point1.x = 2;
 				status.point1.y = y;
-				status.angle = 0;
 				return;
 			}
 
@@ -177,7 +177,6 @@ package
 				status.point0.y = 0;
 				status.point1.x = x;
 				status.point1.y = 2;
-				status.angle = 270;
 				return;
 			}
 
@@ -192,7 +191,6 @@ package
 				status.point0.y = 0;
 				status.point1.x = 2;
 				status.point1.y = 2;
-				status.angle = 270 + 90 / 2;
 				return;
 			}
 			
@@ -207,12 +205,14 @@ package
 				status.point0.y = 2;
 				status.point1.x = 2;
 				status.point1.y = 0;
-				status.angle = 90 / 2;
 				return;
 			}
 			
 			if (isNothing())
+			{
 				status.status = END_WIN_NOTHING;
+				return;
+			}
 				
 			status.status = END_NULL;
 		}

@@ -105,6 +105,9 @@ package
 			_stcGameOver.y  = (_height - 70) / 2;
 			_stcGameOver.height = 100;
 			this.addChild(_stcGameOver);
+			
+			this.useHandCursor = true;
+			this.buttonMode = true;
 		}
 		
 		public function setTime(seconds:int):void
@@ -226,15 +229,18 @@ package
 			setGameOverText(winner);
 			
 			// Draw line
-			
-			g.lineStyle(20, 0x800080, 0.5, true);
-			var x: int = (Math.random() * int.MAX_VALUE) % 100 - 50;
-			var y: int = (Math.random() * int.MAX_VALUE) % 100 - 50;
-			g.moveTo(_squareSizeX * (status.point0.x + 0.5) + x, _squareSizeY * (status.point0.y + 0.5) + _top + y);
-			x = (Math.random() * int.MAX_VALUE) % 20 - 10;
-			y = (Math.random() * int.MAX_VALUE) % 20 - 10;
-			g.lineTo(_squareSizeX * (status.point1.x + 0.5) + x, _squareSizeY * (status.point1.y + 0.5) + _top + y);
-			
+			trace("status: ", status.status);
+			if (status.status == Core.END_WIN_CROSS || status.status == Core.END_WIN_ZERO)
+			{
+				g.lineStyle(20, 0x800080, 0.5, true);
+				var x: int = (Math.random() * int.MAX_VALUE) % 150 - 75;
+				var y: int = (Math.random() * int.MAX_VALUE) % 150 - 75;
+				g.moveTo(_squareSizeX * (status.point0.x + 0.5) + x, _squareSizeY * (status.point0.y + 0.5) + _top + y);
+				x = (Math.random() * int.MAX_VALUE) % 20 - 10;
+				y = (Math.random() * int.MAX_VALUE) % 20 - 10;
+				g.lineTo(_squareSizeX * (status.point1.x + 0.5) + x, _squareSizeY * (status.point1.y + 0.5) + _top + y);
+			}
+
 			this.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			this.removeEventListener(MouseEvent.CLICK, onMouseClick);
 		}
@@ -362,6 +368,8 @@ package
 			_stcGameOver.text = text;
 			_stcGameOver.setTextFormat(format);
 			_stcGameOver.visible = true;
+			
+			_selectSquare.visible = false;
 		}
 	}
 
