@@ -210,12 +210,12 @@ package
 			this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		}
 		
-		public function showWin(status: int):void
+		public function showWin(status: CheckGameStatus):void
 		{
 			var g:Graphics = this.graphics;
 
 			var winner:String;
-			switch (status)
+			switch (status.status)
 			{
 				case Core.END_WIN_CROSS: winner = "Выиграли крестики"; break;
 				case Core.END_WIN_ZERO: winner = "Выиграли нолики"; break;
@@ -224,6 +224,16 @@ package
 					throw "Unknown winner";
 			}
 			setGameOverText(winner);
+			
+			// Draw line
+			
+			g.lineStyle(20, 0x800080, 0.5, true);
+			var x: int = (Math.random() * int.MAX_VALUE) % 100 - 50;
+			var y: int = (Math.random() * int.MAX_VALUE) % 100 - 50;
+			g.moveTo(_squareSizeX * (status.point0.x + 0.5) + x, _squareSizeY * (status.point0.y + 0.5) + _top + y);
+			x = (Math.random() * int.MAX_VALUE) % 20 - 10;
+			y = (Math.random() * int.MAX_VALUE) % 20 - 10;
+			g.lineTo(_squareSizeX * (status.point1.x + 0.5) + x, _squareSizeY * (status.point1.y + 0.5) + _top + y);
 			
 			this.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			this.removeEventListener(MouseEvent.CLICK, onMouseClick);

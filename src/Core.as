@@ -2,7 +2,9 @@ package
 {
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
 	import flash.utils.Timer;
+
 	/**
 	 * ...
 	 * @author SlaFF
@@ -11,10 +13,13 @@ package
 	{
 		private var _mode: int = 0;
 		private var _usedSquareCount: int = 0;
+		private var _checkGameStatus: CheckGameStatus;
 		
 		private var _whoPlay: Boolean; // true - Cross, false - Zero
 		
 		private var _field:Field;
+		
+		private var _computer: Computer;
 		
 		private var _timer: Timer;
 		
@@ -29,12 +34,22 @@ package
 		public static const END_WIN_CROSS:int   = 3;
 		public static const END_WIN_NOTHING:int = 4;
 		
-		public function Core(field:Field) 
+		public function Core(field:Field)
 		{
 			_mode = MODE_EASY;
 			_field = field;
 			_timer = new Timer(1000);
 			_timer.addEventListener(TimerEvent.TIMER, onTimer);
+			
+			_computer = new Computer(field);
+			_computer.setDifficult(0);
+			
+			_checkGameStatus = new CheckGameStatus();
+		}
+
+		public function getComputer():Computer
+		{
+			return _computer;
 		}
 		
 		private function onTimer(e:TimerEvent):void
@@ -87,34 +102,37 @@ package
 			_field.setSquareValue(x, y, value);
 			_usedSquareCount++;
 
-			// Check
-			var status:int = checkGameOver(x, y);
-
-			if (status != END_NULL)
-			{
-				_timer.stop();
-				_field.showWin(status);
-				return status;
-			}
+			var status:CheckGameStatus = checkGameOver(x, y)
+			trace(status);
+			if (status.status != END_NULL)
+				return status.status;
 			
 			swapPlayers();
+			
+			if (_computer.isActive())
+			{
+				_computer.click(_whoPlay);
+				status = checkGameOver(x, y);
+				if (status.status != END_NULL)
+					return status.status;
+			}
 
 			return END_NULL;
 		}
 		
-		private function checkGameOver(x:int, y:int): int
+		private function getGameStatus(x:int, y:int, status: CheckGameStatus):void
 		{
-			var status: int;
 			var value: int;
+			
 			if (_whoPlay)
 			{
 				value = Field.VALUE_CROSS;
-				status = END_WIN_CROSS
+				status.status = END_WIN_CROSS
 			}
 			else
 			{
 				value = Field.VALUE_ZERO;
-				status = END_WIN_ZERO;
+				status.status = END_WIN_ZERO;
 			}
 						
 			var arrField:Array = _field.getFieldArray();
@@ -139,8 +157,13 @@ package
 				win &&= arrField[y0 + i] == value;
 			if (win)
 			{
-				trace("win hor")
-				return status;
+				trace("win hor");
+				status.point0.x = 0;
+				status.point0.y = y;
+				status.point1.x = 2;
+				status.point1.y = y;
+				status.angle = 0;
+				return;
 			}
 
 			// Vertical
@@ -149,8 +172,13 @@ package
 				win &&= arrField[_field.getCountX() * i + x] == value;
 			if (win)
 			{
-				trace("win vert")
-				return status;
+				trace("win vert", x, y);
+				status.point0.x = x;
+				status.point0.y = 0;
+				status.point1.x = x;
+				status.point1.y = 2;
+				status.angle = 270;
+				return;
 			}
 
 			// Diagonal low
@@ -159,8 +187,13 @@ package
 				win &&= arrField[_field.getCountX() * i + i] == value;
 			if (win)
 			{
-				trace("win diag low")
-				return status;
+				trace("win diag low");
+				status.point0.x = 0;
+				status.point0.y = 0;
+				status.point1.x = 2;
+				status.point1.y = 2;
+				status.angle = 270 + 90 / 2;
+				return;
 			}
 			
 			// Diagonal hi
@@ -169,14 +202,36 @@ package
 				win &&= arrField[_field.getCountX() * i + (2 - i)] == value;
 			if (win)
 			{
-				trace("win diag hi")
-				return status;
+				trace("win diag hi");
+				status.point0.x = 0;
+				status.point0.y = 2;
+				status.point1.x = 2;
+				status.point1.y = 0;
+				status.angle = 90 / 2;
+				return;
 			}
 			
 			if (isNothing())
-				return END_WIN_NOTHING;
+				status.status = END_WIN_NOTHING;
 				
-			return END_NULL;
+			status.status = END_NULL;
+		}
+		
+		private function checkGameOver(x:int, y:int): CheckGameStatus
+		{
+			var angle: int;
+			var pt: Point;
+			var status: CheckGameStatus = _checkGameStatus;
+			
+			getGameStatus(x, y, status);
+			if (status.status != END_NULL)
+			{
+				_timer.stop();
+				_field.showWin(status);
+				return status;
+			}
+			
+			return status;
 		}
 		
 		public function isNothing():Boolean
