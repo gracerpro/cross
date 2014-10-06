@@ -43,6 +43,7 @@ package
 			
 			_computer = new Computer(field);
 			_computer.setDifficult(0);
+			_computer.setActive(true);
 			
 			_checkGameStatus = new CheckGameStatus();
 		}
@@ -111,11 +112,12 @@ package
 			
 			if (_computer.isActive())
 			{
-				_computer.click(_whoPlay);
-				_usedSquareCount++;
+				if (_computer.click(_whoPlay))
+					_usedSquareCount++;
 				status = checkGameOver(x, y);
 				if (status.status != END_NULL)
 					return status.status;
+				swapPlayers();
 			}
 
 			return END_NULL;
@@ -128,12 +130,14 @@ package
 			if (_whoPlay)
 			{
 				value = Field.VALUE_CROSS;
-				status.status = END_WIN_CROSS
+				status.status = END_WIN_CROSS;
+				trace("checl for clross");
 			}
 			else
 			{
 				value = Field.VALUE_ZERO;
 				status.status = END_WIN_ZERO;
+				trace("check for zero");
 			}
 						
 			var arrField:Array = _field.getFieldArray();
